@@ -23,8 +23,8 @@ find_package(raylib CONFIG REQUIRED)
 find_package(mosquitto REQUIRED)
 find_package(OpenSSL REQUIRED)
 
-target_include_directories(main PRIVATE ${raylib_INCLUDE_DIRS} ${MOSQUITTO_INCLUDE_DIRS})
-target_link_libraries(main PRIVATE ${raylib_LIBRARIES} ${MOSQUITTO_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
+target_include_directories(main PRIVATE ${RAYLIB_INCLUDE_DIRS} ${MOSQUITTO_INCLUDE_DIRS})
+target_link_libraries(main PRIVATE ${RAYLIB_LIBRARIES} ${MOSQUITTO_LIBRARIES} OpenSSL::SSL OpenSSL::Crypto)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     # From "Working with CMake" documentation:

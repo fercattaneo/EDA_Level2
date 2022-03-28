@@ -2,7 +2,7 @@
 #include "MQTTClient.h"
 #include <iostream>
 #include <vector>
-#include <raylib.h>
+#include "raylib.h"
 
 int main (void){
 
@@ -14,6 +14,8 @@ int main (void){
     if(var1!=0){
         std::cout << "El cliente esta conectado" << std::endl;
     }
+    SetTargetFPS(60);
+
     cliente.subscribe("robot1/display/leftEye/set");
     cliente.subscribe("robot1/display/rightEye/set");
     cliente.subscribe("robot1/motor1/current/set");
@@ -66,5 +68,6 @@ int main (void){
             cliente.publish(mensaje2.topic, mensaje2.payload);
         }
     }
+    std::cout << "Termino" << std::endl;
     return 0;
 }
