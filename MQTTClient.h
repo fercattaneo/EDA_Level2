@@ -25,6 +25,7 @@ public:
     bool connect(std::string host, int port, std::string username, std::string password);
     bool isConnected();
     void disconnect();
+    void doFuntions ();
 
     bool publish(std::string topic, std::vector<char> &payload);
 

@@ -9,6 +9,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <raylib.h>
 
 static void onMQTTMessage(struct mosquitto *mosquittoClient,
                           void *context,
@@ -235,4 +236,40 @@ std::vector<char> MQTTClient::getArrayFromFloat(float payload){
     std::vector<char> data (sizeof(float));
     memcpy(data.data(), &payload, sizeof(float));
     return data;
+}
+void MQTTClient::doFuntions (){
+        if(IsKeyDown(KEY_UP)){
+            class MQTTMessage mensaje1, mensaje2;
+            mensaje1.topic = "robot1/motor1/current/set";
+            mensaje1.payload = getArrayFromFloat(-1.0F);
+            publish(mensaje1.topic, mensaje1.payload);
+            mensaje2.topic = "robot1/motor3/current/set";
+            mensaje2.payload = getArrayFromFloat(1.0F);
+            publish(mensaje2.topic, mensaje2.payload);
+        }
+        if(IsKeyDown(KEY_DOWN)){
+            class MQTTMessage mensaje1, mensaje2;
+            mensaje1.topic = "robot1/motor1/current/set";
+            mensaje1.payload = getArrayFromFloat(-1.0F);
+            publish(mensaje1.topic, mensaje1.payload);
+            mensaje2.topic = "robot1/motor3/current/set";
+            mensaje2.payload = getArrayFromFloat(-1.0F);
+            publish(mensaje2.topic, mensaje2.payload);
+        }
+        if(IsKeyDown(KEY_RIGHT)){
+            class MQTTMessage mensaje1, mensaje2;
+            mensaje1.topic = "robot1/motor1/current/set";
+            mensaje1.payload = getArrayFromFloat(1.0F);
+            mensaje2.topic = "robot1/motor3/current/set";
+            mensaje2.payload = getArrayFromFloat(-1.0F);
+            publish(mensaje2.topic, mensaje2.payload);
+        }
+        if(IsKeyDown(KEY_LEFT)){
+            class MQTTMessage mensaje1, mensaje2;
+            mensaje1.topic = "robot1/motor1/current/set";
+            mensaje1.payload = getArrayFromFloat(-1.0F);
+            mensaje2.topic = "robot1/motor3/current/set";
+            mensaje2.payload = getArrayFromFloat(1.0F);
+            publish(mensaje2.topic, mensaje2.payload);
+        }
 }
