@@ -11,36 +11,36 @@
 class MQTTMessage
 {
 public:
-    std::string topic;
-    std::vector<char> payload;
+	std::string topic;
+	std::vector<char> payload;
 };
 
 class MQTTClient
 {
 public:
-    MQTTClient(std::string clientId);
-    ~MQTTClient();
+	MQTTClient(std::string clientId);
+	~MQTTClient();
 
-    bool connect(std::string host, int port, std::string username, std::string password);
-    bool isConnected();
-    void disconnect();
-    void doFuntions ();
+	bool connect(std::string host, int port, std::string username, std::string password);
+	bool isConnected();
+	void disconnect();
 
-    bool publish(std::string topic, std::vector<char> &payload);
+	bool publish(std::string topic, std::vector<char>& payload);
+	bool subscribe(std::string topic);
+	bool unsubscribe(std::string topic);
 
-    bool subscribe(std::string topic);
-    bool unsubscribe(std::string topic);
+	void doFuntions();
 
-    std::vector<MQTTMessage> getMessages();
-    std::vector<char> getArrayFromFloat(float payload);
+	std::vector<MQTTMessage> getMessages();
+	std::vector<char> getArrayFromFloat(float payload);
 
 private:
-    struct mosquitto *mosquittoInstance;
-    bool connected;
+	struct mosquitto* mosquittoInstance;
+	bool connected;
 
-    std::vector<MQTTMessage> lastMessages;
+	std::vector<MQTTMessage> lastMessages;
 
-    friend void onMQTTMessage(struct mosquitto *mosquittoClient,
-                              void *context,
-                              const struct mosquitto_message *message);
+	friend void onMQTTMessage(struct mosquitto* mosquittoClient,
+		void* context,
+		const struct mosquitto_message* message);
 };
