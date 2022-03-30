@@ -245,7 +245,7 @@ std::vector<char> MQTTClient::getArrayFromFloat(float payload) {
 	memcpy(data.data(), &payload, sizeof(float));
 	return data;
 }
-void MQTTClient::doFuntions() {
+void MQTTClient::moveMotors() {
 	raylib::Vector2 direction(IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT),
 		IsKeyDown(KEY_UP) - IsKeyDown(KEY_DOWN));
 
@@ -272,4 +272,13 @@ void MQTTClient::doFuntions() {
 	publish(msj2.topic, msj2.payload);
 	publish(msj3.topic, msj3.payload);
 	publish(msj4.topic, msj4.payload);
+}
+void MQTTClient::setEyes(){
+	class MQTTMessage msj1, msj2;
+	msj1.topic = "robot1/display/leftEye/set";
+	msj1.payload = { 120, 0, 0 };
+	msj2.topic = "robot1/display/rightEye/set";
+	msj2.payload = { 120, 0, 0 };
+	publish(msj1.topic, msj1.payload);
+	publish(msj2.topic, msj2.payload);
 }

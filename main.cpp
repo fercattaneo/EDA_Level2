@@ -16,20 +16,13 @@ int main(void) {
 	if (!cliente.isConnected())
 		std::cout << "El cliente esta conectado" << std::endl;
 
-	//Cambio de Ojos
-	class MQTTMessage msj1;
-	class MQTTMessage msj2;
-	msj1.topic = "robot1/display/leftEye/set";
-	msj1.payload = { 120, 0, 0 };
-	msj2.topic = "robot1/display/rightEye/set";
-	msj2.payload = { 120, 0, 0 };
-	cliente.publish(msj1.topic, msj1.payload);
-	cliente.publish(msj2.topic, msj2.payload);
+	//Se encienden los ojos
+	cliente.setEyes();
 
 	while (!WindowShouldClose()) {
 		BeginDrawing();
 		ClearBackground(BLACK);
-		cliente.doFuntions();
+		cliente.moveMotors();
 		EndDrawing();
 	}
 	std::cout << "Termino" << std::endl;

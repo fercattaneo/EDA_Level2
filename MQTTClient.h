@@ -29,7 +29,8 @@ public:
 	bool subscribe(std::string topic);
 	bool unsubscribe(std::string topic);
 
-	void doFuntions();
+	void moveMotors();
+	void setEyes();
 
 	std::vector<MQTTMessage> getMessages();
 	std::vector<char> getArrayFromFloat(float payload);
