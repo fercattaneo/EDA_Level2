@@ -249,10 +249,12 @@ void MQTTClient::doFuntions() {
     raylib::Vector2 direction(IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT),
                               IsKeyDown(KEY_UP) - IsKeyDown(KEY_DOWN));
 
-    raylib::Vector4 motor(direction.DotProduct(VECTOR_MOV_1),
+    int rotationCoef = IsKeyDown(KEY_SPACE);
+    
+    raylib::Vector4 motor(direction.DotProduct(VECTOR_MOV_1) * (1 + rotationCoef),
                           direction.DotProduct(VECTOR_MOV_2),
                           direction.DotProduct(VECTOR_MOV_3),
-                          direction.DotProduct(VECTOR_MOV_4));
+                          direction.DotProduct(VECTOR_MOV_4) * (1 - rotationCoef));
     motor.Normalize();
 
     MQTTMessage mensaje1, mensaje2, mensaje3, mensaje4;
