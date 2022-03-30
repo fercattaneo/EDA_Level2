@@ -6,7 +6,6 @@
 
 #include <string>
 #include <vector>
-
 #include <mosquitto.h>
 
 class MQTTMessage

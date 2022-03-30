@@ -9,7 +9,15 @@
 
 #include <cstring>
 #include <iostream>
-#include <raylib.h>
+#include "raylib-cpp.hpp"
+#include "raymath.h"
+
+#define LIMIT_CURRENT 5
+
+#define VECTOR_MOV_1 {-1, 1}
+#define VECTOR_MOV_2 {-1,-1}
+#define VECTOR_MOV_3 { 1,-1}
+#define VECTOR_MOV_4 { 1, 1}
 
 static void onMQTTMessage(struct mosquitto *mosquittoClient,
                           void *context,
@@ -237,39 +245,29 @@ std::vector<char> MQTTClient::getArrayFromFloat(float payload){
     memcpy(data.data(), &payload, sizeof(float));
     return data;
 }
-void MQTTClient::doFuntions (){
-        if(IsKeyDown(KEY_UP)){
-            class MQTTMessage mensaje1, mensaje2;
-            mensaje1.topic = "robot1/motor1/current/set";
-            mensaje1.payload = getArrayFromFloat(-1.0F);
-            publish(mensaje1.topic, mensaje1.payload);
-            mensaje2.topic = "robot1/motor3/current/set";
-            mensaje2.payload = getArrayFromFloat(1.0F);
-            publish(mensaje2.topic, mensaje2.payload);
-        }
-        if(IsKeyDown(KEY_DOWN)){
-            class MQTTMessage mensaje1, mensaje2;
-            mensaje1.topic = "robot1/motor1/current/set";
-            mensaje1.payload = getArrayFromFloat(-1.0F);
-            publish(mensaje1.topic, mensaje1.payload);
-            mensaje2.topic = "robot1/motor3/current/set";
-            mensaje2.payload = getArrayFromFloat(-1.0F);
-            publish(mensaje2.topic, mensaje2.payload);
-        }
-        if(IsKeyDown(KEY_RIGHT)){
-            class MQTTMessage mensaje1, mensaje2;
-            mensaje1.topic = "robot1/motor1/current/set";
-            mensaje1.payload = getArrayFromFloat(1.0F);
-            mensaje2.topic = "robot1/motor3/current/set";
-            mensaje2.payload = getArrayFromFloat(-1.0F);
-            publish(mensaje2.topic, mensaje2.payload);
-        }
-        if(IsKeyDown(KEY_LEFT)){
-            class MQTTMessage mensaje1, mensaje2;
-            mensaje1.topic = "robot1/motor1/current/set";
-            mensaje1.payload = getArrayFromFloat(-1.0F);
-            mensaje2.topic = "robot1/motor3/current/set";
-            mensaje2.payload = getArrayFromFloat(1.0F);
-            publish(mensaje2.topic, mensaje2.payload);
-        }
+void MQTTClient::doFuntions() {
+    raylib::Vector2 direction(IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT),
+                              IsKeyDown(KEY_UP) - IsKeyDown(KEY_DOWN));
+
+    raylib::Vector4 motor(direction.DotProduct(VECTOR_MOV_1),
+                          direction.DotProduct(VECTOR_MOV_2),
+                          direction.DotProduct(VECTOR_MOV_3),
+                          direction.DotProduct(VECTOR_MOV_4));
+    motor.Normalize();
+
+    MQTTMessage mensaje1, mensaje2, mensaje3, mensaje4;
+    mensaje1.topic = "robot1/motor1/current/set";
+    mensaje2.topic = "robot1/motor2/current/set";
+    mensaje3.topic = "robot1/motor3/current/set";
+    mensaje4.topic = "robot1/motor4/current/set";
+
+    mensaje1.payload = getArrayFromFloat(LIMIT_CURRENT*motor.x);
+    mensaje2.payload = getArrayFromFloat(LIMIT_CURRENT*motor.y);
+    mensaje3.payload = getArrayFromFloat(LIMIT_CURRENT*motor.z);
+    mensaje4.payload = getArrayFromFloat(LIMIT_CURRENT*motor.w);
+
+    publish(mensaje1.topic, mensaje1.payload);
+    publish(mensaje2.topic, mensaje2.payload);
+    publish(mensaje3.topic, mensaje3.payload);
+    publish(mensaje4.topic, mensaje4.payload);
 }
