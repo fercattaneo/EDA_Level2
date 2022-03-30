@@ -1,6 +1,7 @@
 /*
  * Simple MQTT Client
- *
+ * Editado por: Cattaneo Fernanda y Franco Grippino
+ * EDA Level 2
  * Copyright (C) 2022 Marc S. Ressl
  */
 
@@ -31,9 +32,12 @@ public:
 
 	void moveMotors();
 	void setEyes();
+	void setKickerChipper();
+	void setDribbler();
 
 	std::vector<MQTTMessage> getMessages();
 	std::vector<char> getArrayFromFloat(float payload);
+	std::vector<float> getArrayOfFloat(std::vector<char> vector);
 
 private:
 	struct mosquitto* mosquittoInstance;

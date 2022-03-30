@@ -1,6 +1,7 @@
 /*
  * Simple MQTT Client
- *
+ * Editado por: Fernanda Cattaneo y Franco Grippino
+ * EDA Level 2
  * Copyright (C) 2022 Marc S. Ressl
  *
  * libmosquitto documentation:
@@ -245,6 +246,10 @@ std::vector<char> MQTTClient::getArrayFromFloat(float payload) {
 	memcpy(data.data(), &payload, sizeof(float));
 	return data;
 }
+
+//Función que mueve los motores de acuerdo con la o las teclas precionadas
+//Esta función trabaja por medio de vectores
+
 void MQTTClient::moveMotors() {
 	raylib::Vector2 direction(IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT),
 		IsKeyDown(KEY_UP) - IsKeyDown(KEY_DOWN));
@@ -273,7 +278,9 @@ void MQTTClient::moveMotors() {
 	publish(msj3.topic, msj3.payload);
 	publish(msj4.topic, msj4.payload);
 }
-void MQTTClient::setEyes(){
+
+//Funcion que enciende los ojos del robot
+void MQTTClient::setEyes(){ 
 	class MQTTMessage msj1, msj2;
 	msj1.topic = "robot1/display/leftEye/set";
 	msj1.payload = { 120, 0, 0 };
@@ -281,4 +288,37 @@ void MQTTClient::setEyes(){
 	msj2.payload = { 120, 0, 0 };
 	publish(msj1.topic, msj1.payload);
 	publish(msj2.topic, msj2.payload);
+}
+
+//Función para hacer funcionar el Kricker y el Chipper. 
+//Estos se activan con la tecla ENTER
+void MQTTClient::setKickerChipper(){
+	class MQTTMessage msj1, msj2, msj3;
+	if(IsKeyDown(KEY_ENTER)){
+		msj1.topic = "robot1/kicker/chargeVoltage/set";
+		msj1.payload = getArrayFromFloat(100.0F);
+		publish(msj1.topic, msj1.payload);
+		msj2.topic = "robot1/kicker/kick/cmd";
+		msj2.payload = getArrayFromFloat(0.5F);
+		publish(msj2.topic, msj2.payload);
+		msj3.topic = "robot1/kicker/chip/cmd";
+		msj3.payload = getArrayFromFloat(0.5F);
+		publish(msj3.topic, msj3.payload);
+    }
+}
+
+//Función para encender el Dribbler. Se enciende con la tecla
+//Blockspace y se apaga con la tecla M
+void MQTTClient::setDribbler(){
+	class MQTTMessage msj1;
+	if(IsKeyDown(KEY_BACKSPACE)){
+		msj1.topic = "robot1/dribbler/current/set";
+		msj1.payload = getArrayFromFloat(0.5F);
+		publish(msj1.topic, msj1.payload);
+	}
+	if(IsKeyDown(KEY_M)){
+		msj1.topic = "robot1/dribbler/voltage/set";
+		msj1.payload = getArrayFromFloat(0.0F);
+		publish(msj1.topic, msj1.payload);
+	}
 }

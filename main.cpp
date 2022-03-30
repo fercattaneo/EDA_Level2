@@ -1,3 +1,8 @@
+/*
+* Hecho por Fernanda Cattaneo y Franco Grippino
+* EDA Level 2
+* Main Module
+*/
 
 #include "MQTTClient.h"
 #include <iostream>
@@ -7,7 +12,7 @@
 int main(void) {
 
 	//Inicializacion Ventana
-	InitWindow(300, 300, "EDA PARK");
+	InitWindow(500, 500, "EDA PARK");
 	SetTargetFPS(60);
 
 	//Inicializacion del cliente
@@ -19,13 +24,15 @@ int main(void) {
 	//Se encienden los ojos
 	cliente.setEyes();
 
-	while (!WindowShouldClose()) {
+	while (!WindowShouldClose()) { //Actualiza los motores de acuerdo a las teclas presionadas
 		BeginDrawing();
 		ClearBackground(BLACK);
 		cliente.moveMotors();
+		cliente.setKickerChipper();
+		cliente.setDribbler();
 		EndDrawing();
 	}
-	std::cout << "Termino" << std::endl;
+	std::cout << "Termino" << std::endl; //Imprime cuando se cerró la ventana de raylib
 	CloseWindow();
 	return 0;
 }
