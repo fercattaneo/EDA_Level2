@@ -10,6 +10,7 @@
 
 #include <cstring>
 #include <iostream>
+#include <assert.h>
 #include "raylib-cpp.hpp"
 #include "raymath.h"
 
@@ -256,18 +257,26 @@ std::vector<char> MQTTClient::getArrayFromFloat(float payload) {
 	return data;
 }
 
-//Función de movimiento del robot, a travez de los 4 motores
-// 
-// Esta función envia los valores de corriente a cada motor,
-// para obtenerlos se utiliza una transformación lineal
-// sobre la dirección deseada
-// Ademas utiliza un coeficiente de rotación que permite
-// modificar la matriz de transformación y asi lograr rotar al robot
-// 
-// Normalizando el vector resultante y luego escalandolo 
-// por el valor limite permite mantener limitado a los motores
-// y evitar que se quemen
-// 
+//Funcion para convertir un vector de char a un float
+float MQTTClient::getString(std::vector<char> vec){
+	float value = 0.0;
+	assert(vec.size() == sizeof(value));
+	memcpy(&value, &vec[0], std::min(vec.size(), sizeof(float)));
+	return value;
+}
+
+/*Función de movimiento del robot, a travez de los 4 motores
+* 
+* Esta función envia los valores de corriente a cada motor,
+* para obtenerlos se utiliza una transformación lineal
+* sobre la dirección deseada.
+* Ademas utiliza un coeficiente de rotación que permite
+* modificar la matriz de transformación y asi lograr rotar al robot.
+* 
+* Normalizando el vector resultante y luego escalandolo 
+* por el valor limite permite mantener limitado a los motores
+* y evitar que se quemen
+*/
 void MQTTClient::moveMotors() {
 	//Calculo de corriente sobre los motores
 	raylib::Vector2 direction(IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT),

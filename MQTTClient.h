@@ -37,7 +37,7 @@ public:
 
 	std::vector<MQTTMessage> getMessages();
 	std::vector<char> getArrayFromFloat(float payload);
-	std::vector<float> getArrayOfFloat(std::vector<char> vector);
+	float getString(std::vector<char> vector);
 
 private:
 	struct mosquitto* mosquittoInstance;
