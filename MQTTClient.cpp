@@ -13,12 +13,20 @@
 #include "raylib-cpp.hpp"
 #include "raymath.h"
 
-#define LIMIT_CURRENT 5
+// Definicion de Constantes:
+// 
+// LIMIT_CURRENT: Corriente maxima dada a los motores,
+// evita la sobreexigencia de los motores q llevan a quemarlos
+// 
+// VECTOR_MOV_(i): Vector columna de la matriz de movimiento para motores
+// 
+#define LIMIT_CURRENT 5.0F
 
-#define VECTOR_MOV_1 {-1, 1}
-#define VECTOR_MOV_2 {-1,-1}
-#define VECTOR_MOV_3 { 1,-1}
-#define VECTOR_MOV_4 { 1, 1}
+#define VECTOR_MOV_1 {-1.0F, 1.0F}
+#define VECTOR_MOV_2 {-1.0F,-1.0F}
+#define VECTOR_MOV_3 { 1.0F,-1.0F}
+#define VECTOR_MOV_4 { 1.0F, 1.0F}
+
 
 static void onMQTTMessage(struct mosquitto* mosquittoClient,
 	void* context,
@@ -240,6 +248,7 @@ vector<MQTTMessage> MQTTClient::getMessages()
 
 	return messages;
 }
+
 //Funcion para trasnformar un float a vector de char.
 std::vector<char> MQTTClient::getArrayFromFloat(float payload) {
 	std::vector<char> data(sizeof(float));
@@ -247,36 +256,50 @@ std::vector<char> MQTTClient::getArrayFromFloat(float payload) {
 	return data;
 }
 
-//Función que mueve los motores de acuerdo con la o las teclas precionadas
-//Esta función trabaja por medio de vectores
-
+//Función de movimiento del robot, a travez de los 4 motores
+// 
+// Esta función envia los valores de corriente a cada motor,
+// para obtenerlos se utiliza una transformación lineal
+// sobre la dirección deseada
+// Ademas utiliza un coeficiente de rotación que permite
+// modificar la matriz de transformación y asi lograr rotar al robot
+// 
+// Normalizando el vector resultante y luego escalandolo 
+// por el valor limite permite mantener limitado a los motores
+// y evitar que se quemen
+// 
 void MQTTClient::moveMotors() {
+	//Calculo de corriente sobre los motores
 	raylib::Vector2 direction(IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT),
 		IsKeyDown(KEY_UP) - IsKeyDown(KEY_DOWN));
-
 	int rotationCoef = IsKeyDown(KEY_SPACE);
 
 	raylib::Vector4 motor(direction.DotProduct(VECTOR_MOV_1),
 		direction.DotProduct(VECTOR_MOV_2) * (1 - rotationCoef),
 		direction.DotProduct(VECTOR_MOV_3),
 		direction.DotProduct(VECTOR_MOV_4) * (1 + rotationCoef));
-	motor.Normalize();
 
+	//Creación y Publicación de los mensajes
 	MQTTMessage msj1, msj2, msj3, msj4;
 	msj1.topic = "robot1/motor1/current/set";
 	msj2.topic = "robot1/motor2/current/set";
 	msj3.topic = "robot1/motor3/current/set";
 	msj4.topic = "robot1/motor4/current/set";
 
-	msj1.payload = getArrayFromFloat(LIMIT_CURRENT * motor.x);
-	msj2.payload = getArrayFromFloat(LIMIT_CURRENT * motor.y);
-	msj3.payload = getArrayFromFloat(LIMIT_CURRENT * motor.z);
-	msj4.payload = getArrayFromFloat(LIMIT_CURRENT * motor.w);
+	msj1.payload = getArrayFromFloat(LIMIT_CURRENT * motor.Normalize().x);
+	msj2.payload = getArrayFromFloat(LIMIT_CURRENT * motor.Normalize().y);
+	msj3.payload = getArrayFromFloat(LIMIT_CURRENT * motor.Normalize().z);
+	msj4.payload = getArrayFromFloat(LIMIT_CURRENT * motor.Normalize().w);
 
 	publish(msj1.topic, msj1.payload);
 	publish(msj2.topic, msj2.payload);
 	publish(msj3.topic, msj3.payload);
 	publish(msj4.topic, msj4.payload);
+
+	std::cout << LIMIT_CURRENT * motor.Normalize().x << " ";
+	std::cout << LIMIT_CURRENT * motor.Normalize().y << " ";
+	std::cout << LIMIT_CURRENT * motor.Normalize().z << " ";
+	std::cout << LIMIT_CURRENT * motor.Normalize().w << std::endl;
 }
 
 //Funcion que enciende los ojos del robot

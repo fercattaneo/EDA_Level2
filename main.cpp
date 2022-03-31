@@ -18,21 +18,26 @@ int main(void) {
 	//Inicializacion del cliente
 	MQTTClient cliente("controller");
 	cliente.connect("127.0.0.1", 1883, "user", "vdivEMMN3SQWX2Ez");
-	if (!cliente.isConnected())
-		std::cout << "El cliente esta conectado" << std::endl;
+	if (!cliente.isConnected()) {
+		std::cout << "Error de conexión" << std::endl;
+		return 1;
+	}
+	std::cout << "El cliente esta conectado" << std::endl;
 
 	//Se encienden los ojos
 	cliente.setEyes();
 
-	while (!WindowShouldClose()) { //Actualiza los motores de acuerdo a las teclas presionadas
+	//Actualiza el robot de acuerdo a las teclas presionadas
+	while (!WindowShouldClose()) { 
 		BeginDrawing();
-		ClearBackground(BLACK);
+		ClearBackground(BLANK);
 		cliente.moveMotors();
 		cliente.setKickerChipper();
 		cliente.setDribbler();
 		EndDrawing();
 	}
-	std::cout << "Termino" << std::endl; //Imprime cuando se cerró la ventana de raylib
+	//Aviso de fin de programa
+	std::cout << "Controlador Finalizado, Gracias por utilizar el EDABot" << std::endl; 
 	CloseWindow();
 	return 0;
 }
