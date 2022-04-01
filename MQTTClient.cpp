@@ -20,7 +20,10 @@
 // evita la sobreexigencia de los motores q llevan a quemarlos
 //
 // VECTOR_MOV_(i): Vector columna de la matriz de movimiento para motores
-//
+// KICKER_CHARGEVOLTAGE & KICKER_KICK & KICKER_CHIP: Kicker constants
+// 
+// DRIBBLER_CURRECT: Dribbler constant
+
 #define LIMIT_CURRENT 5.0F
 
 #define VECTOR_MOV_1 \
@@ -39,6 +42,12 @@
 	{                \
 		1.0F, 1.0F   \
 	}
+
+#define KICKER_CHARGEVOLTAGE 100.0F
+#define KICKER_KICK 0.5F
+#define KICKER_CHIP 0.5F
+
+#define DRIBBLER_CURRECT 0.5F
 
 static void onMQTTMessage(struct mosquitto *mosquittoClient,
 						  void *context,
@@ -325,11 +334,6 @@ void MQTTClient::moveMotors()
 	publish(msj2.topic, msj2.payload);
 	publish(msj3.topic, msj3.payload);
 	publish(msj4.topic, msj4.payload);
-
-	std::cout << LIMIT_CURRENT * motor.Normalize().x << " ";
-	std::cout << LIMIT_CURRENT * motor.Normalize().y << " ";
-	std::cout << LIMIT_CURRENT * motor.Normalize().z << " ";
-	std::cout << LIMIT_CURRENT * motor.Normalize().w << std::endl;
 }
 
 // Funcion que enciende los ojos del robot
@@ -352,13 +356,13 @@ void MQTTClient::setKickerChipper()
 	if (IsKeyDown(KEY_ENTER))
 	{
 		msj1.topic = "robot1/kicker/chargeVoltage/set";
-		msj1.payload = getArrayFromFloat(100.0F);
+		msj1.payload = getArrayFromFloat(KICKER_CHARGEVOLTAGE);
 		publish(msj1.topic, msj1.payload);
 		msj2.topic = "robot1/kicker/kick/cmd";
-		msj2.payload = getArrayFromFloat(0.5F);
+		msj2.payload = getArrayFromFloat(KICKER_KICK);
 		publish(msj2.topic, msj2.payload);
 		msj3.topic = "robot1/kicker/chip/cmd";
-		msj3.payload = getArrayFromFloat(0.5F);
+		msj3.payload = getArrayFromFloat(KICKER_CHIP);
 		publish(msj3.topic, msj3.payload);
 	}
 }
@@ -371,7 +375,7 @@ void MQTTClient::setDribbler()
 	if (IsKeyDown(KEY_BACKSPACE))
 	{
 		msj1.topic = "robot1/dribbler/current/set";
-		msj1.payload = getArrayFromFloat(0.5F);
+		msj1.payload = getArrayFromFloat(DRIBBLER_CURRECT);
 		publish(msj1.topic, msj1.payload);
 	}
 	if (IsKeyDown(KEY_M))
