@@ -15,23 +15,34 @@
 #include "raymath.h"
 
 // Definicion de Constantes:
-// 
+//
 // LIMIT_CURRENT: Corriente maxima dada a los motores,
 // evita la sobreexigencia de los motores q llevan a quemarlos
-// 
+//
 // VECTOR_MOV_(i): Vector columna de la matriz de movimiento para motores
-// 
+//
 #define LIMIT_CURRENT 5.0F
 
-#define VECTOR_MOV_1 {-1.0F, 1.0F}
-#define VECTOR_MOV_2 {-1.0F,-1.0F}
-#define VECTOR_MOV_3 { 1.0F,-1.0F}
-#define VECTOR_MOV_4 { 1.0F, 1.0F}
+#define VECTOR_MOV_1 \
+	{                \
+		-1.0F, 1.0F  \
+	}
+#define VECTOR_MOV_2 \
+	{                \
+		-1.0F, -1.0F \
+	}
+#define VECTOR_MOV_3 \
+	{                \
+		1.0F, -1.0F  \
+	}
+#define VECTOR_MOV_4 \
+	{                \
+		1.0F, 1.0F   \
+	}
 
-
-static void onMQTTMessage(struct mosquitto* mosquittoClient,
-	void* context,
-	const struct mosquitto_message* message);
+static void onMQTTMessage(struct mosquitto *mosquittoClient,
+						  void *context,
+						  const struct mosquitto_message *message);
 
 #include "MQTTClient.h"
 
@@ -41,11 +52,11 @@ using namespace std;
 static bool isMosquittoInitialized = false;
 
 // MQTT message callback.
-static void onMQTTMessage(struct mosquitto* mosquittoClient,
-	void* context,
-	const struct mosquitto_message* message)
+static void onMQTTMessage(struct mosquitto *mosquittoClient,
+						  void *context,
+						  const struct mosquitto_message *message)
 {
-	MQTTClient* mqttClient = (MQTTClient*)context;
+	MQTTClient *mqttClient = (MQTTClient *)context;
 
 	MQTTMessage mqttMessage;
 	mqttMessage.topic = message->topic;
@@ -101,15 +112,15 @@ bool MQTTClient::connect(string host, int port, string username, string password
 	int errorCode;
 
 	mosquitto_username_pw_set(mosquittoInstance,
-		username.c_str(),
-		password.c_str());
+							  username.c_str(),
+							  password.c_str());
 
 	const int keepalive = 60;
 
 	errorCode = mosquitto_connect(mosquittoInstance,
-		host.c_str(),
-		port,
-		keepalive);
+								  host.c_str(),
+								  port,
+								  keepalive);
 
 	if (errorCode == MOSQ_ERR_SUCCESS)
 		connected = true;
@@ -150,18 +161,18 @@ void MQTTClient::disconnect()
  *
  * Returns: call succeeded
  */
-bool MQTTClient::publish(string topic, vector<char>& payload)
+bool MQTTClient::publish(string topic, vector<char> &payload)
 {
 	const int qos = 0;
 	const bool retain = false;
 
 	int errorCode = mosquitto_publish(mosquittoInstance,
-		NULL,
-		topic.c_str(),
-		(int)payload.size(),
-		payload.data(),
-		qos,
-		retain);
+									  NULL,
+									  topic.c_str(),
+									  (int)payload.size(),
+									  payload.data(),
+									  qos,
+									  retain);
 
 	if (errorCode == MOSQ_ERR_NO_CONN)
 		connected = false;
@@ -185,9 +196,9 @@ bool MQTTClient::subscribe(string topic)
 	const int qos = 0;
 
 	int errorCode = mosquitto_subscribe(mosquittoInstance,
-		NULL,
-		topic.c_str(),
-		qos);
+										NULL,
+										topic.c_str(),
+										qos);
 
 	if (errorCode == MOSQ_ERR_NO_CONN)
 		connected = false;
@@ -208,8 +219,8 @@ bool MQTTClient::subscribe(string topic)
 bool MQTTClient::unsubscribe(string topic)
 {
 	int errorCode = mosquitto_unsubscribe(mosquittoInstance,
-		NULL,
-		topic.c_str());
+										  NULL,
+										  topic.c_str());
 
 	if (errorCode == MOSQ_ERR_NO_CONN)
 		connected = false;
@@ -250,45 +261,55 @@ vector<MQTTMessage> MQTTClient::getMessages()
 	return messages;
 }
 
-//Funcion para trasnformar un float a vector de char.
-std::vector<char> MQTTClient::getArrayFromFloat(float payload) {
+// Funcion para trasnformar un float a vector de char.
+std::vector<char> MQTTClient::getArrayFromFloat(float payload)
+{
 	std::vector<char> data(sizeof(float));
+
+	// Extraído de: https://www.cplusplus.com/reference/cstring/memcpy/
 	memcpy(data.data(), &payload, sizeof(float));
+
 	return data;
 }
 
-//Funcion para convertir un vector de char a un float
-float MQTTClient::getString(std::vector<char> vec){
+// Funcion para convertir un vector de char a un float
+float MQTTClient::getFloat(std::vector<char> vec)
+{
 	float value = 0.0;
+
+	// Extraído de: https://www.cplusplus.com/reference/cassert/assert/
 	assert(vec.size() == sizeof(value));
+
 	memcpy(&value, &vec[0], std::min(vec.size(), sizeof(float)));
 	return value;
 }
 
 /*Función de movimiento del robot, a travez de los 4 motores
-* 
-* Esta función envia los valores de corriente a cada motor,
-* para obtenerlos se utiliza una transformación lineal
-* sobre la dirección deseada.
-* Ademas utiliza un coeficiente de rotación que permite
-* modificar la matriz de transformación y asi lograr rotar al robot.
-* 
-* Normalizando el vector resultante y luego escalandolo 
-* por el valor limite permite mantener limitado a los motores
-* y evitar que se quemen
-*/
-void MQTTClient::moveMotors() {
-	//Calculo de corriente sobre los motores
+ *
+ * Esta función envia los valores de corriente a cada motor,
+ * para obtenerlos se utiliza una transformación lineal
+ * sobre la dirección deseada.
+ * Ademas utiliza un coeficiente de rotación que permite
+ * modificar la matriz de transformación y asi lograr rotar al robot.
+ *
+ * Normalizando el vector resultante y luego escalandolo
+ * por el valor limite permite mantener limitado a los motores
+ * y evitar que se quemen
+ */
+void MQTTClient::moveMotors()
+{
+	// Calculo de corriente sobre los motores
 	raylib::Vector2 direction(IsKeyDown(KEY_RIGHT) - IsKeyDown(KEY_LEFT),
-		IsKeyDown(KEY_UP) - IsKeyDown(KEY_DOWN));
+							  IsKeyDown(KEY_UP) - IsKeyDown(KEY_DOWN));
+
 	int rotationCoef = IsKeyDown(KEY_SPACE);
 
 	raylib::Vector4 motor(direction.DotProduct(VECTOR_MOV_1),
-		direction.DotProduct(VECTOR_MOV_2) * (1 - rotationCoef),
-		direction.DotProduct(VECTOR_MOV_3),
-		direction.DotProduct(VECTOR_MOV_4) * (1 + rotationCoef));
+						  direction.DotProduct(VECTOR_MOV_2) * (1 - rotationCoef),
+						  direction.DotProduct(VECTOR_MOV_3),
+						  direction.DotProduct(VECTOR_MOV_4) * (1 + rotationCoef));
 
-	//Creación y Publicación de los mensajes
+	// Creación y Publicación de los mensajes
 	MQTTMessage msj1, msj2, msj3, msj4;
 	msj1.topic = "robot1/motor1/current/set";
 	msj2.topic = "robot1/motor2/current/set";
@@ -311,22 +332,25 @@ void MQTTClient::moveMotors() {
 	std::cout << LIMIT_CURRENT * motor.Normalize().w << std::endl;
 }
 
-//Funcion que enciende los ojos del robot
-void MQTTClient::setEyes(){ 
+// Funcion que enciende los ojos del robot
+void MQTTClient::setEyes()
+{
 	class MQTTMessage msj1, msj2;
 	msj1.topic = "robot1/display/leftEye/set";
-	msj1.payload = { 120, 0, 0 };
+	msj1.payload = {120, 0, 0};
 	msj2.topic = "robot1/display/rightEye/set";
-	msj2.payload = { 120, 0, 0 };
+	msj2.payload = {120, 0, 0};
 	publish(msj1.topic, msj1.payload);
 	publish(msj2.topic, msj2.payload);
 }
 
-//Función para hacer funcionar el Kricker y el Chipper. 
-//Estos se activan con la tecla ENTER
-void MQTTClient::setKickerChipper(){
+// Función para hacer funcionar el Kricker y el Chipper.
+// Estos se activan con la tecla ENTER
+void MQTTClient::setKickerChipper()
+{
 	class MQTTMessage msj1, msj2, msj3;
-	if(IsKeyDown(KEY_ENTER)){
+	if (IsKeyDown(KEY_ENTER))
+	{
 		msj1.topic = "robot1/kicker/chargeVoltage/set";
 		msj1.payload = getArrayFromFloat(100.0F);
 		publish(msj1.topic, msj1.payload);
@@ -336,19 +360,22 @@ void MQTTClient::setKickerChipper(){
 		msj3.topic = "robot1/kicker/chip/cmd";
 		msj3.payload = getArrayFromFloat(0.5F);
 		publish(msj3.topic, msj3.payload);
-    }
+	}
 }
 
-//Función para encender el Dribbler. Se enciende con la tecla
-//Blockspace y se apaga con la tecla M
-void MQTTClient::setDribbler(){
+// Función para encender el Dribbler. Se enciende con la tecla
+// Blockspace y se apaga con la tecla M
+void MQTTClient::setDribbler()
+{
 	class MQTTMessage msj1;
-	if(IsKeyDown(KEY_BACKSPACE)){
+	if (IsKeyDown(KEY_BACKSPACE))
+	{
 		msj1.topic = "robot1/dribbler/current/set";
 		msj1.payload = getArrayFromFloat(0.5F);
 		publish(msj1.topic, msj1.payload);
 	}
-	if(IsKeyDown(KEY_M)){
+	if (IsKeyDown(KEY_M))
+	{
 		msj1.topic = "robot1/dribbler/voltage/set";
 		msj1.payload = getArrayFromFloat(0.0F);
 		publish(msj1.topic, msj1.payload);
